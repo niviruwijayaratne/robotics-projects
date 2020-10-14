@@ -46,7 +46,11 @@ TODO: define a ROS topic callback funtion for getting the state of suction cup
 Whenever ur3/gripper_input publishes info this callback function is called.
 """
 def gripper_callback(msg):
-    pass
+    global digital_in_0
+    global analog_in_0
+
+    digital_in_0 = msg.DIGIN
+    analog_in_0 = msg.AIN0
 
 
 
@@ -175,10 +179,14 @@ def move_block(pub_cmd, loop_rate, start_loc, start_height, \
     move_arm(pub_cmd, loop_rate, Q[start_loc][start_height][1], 4.0, 4.0)
     move_arm(pub_cmd, loop_rate, Q[start_loc][start_height][0], 4.0, 4.0)
     gripper(pub_cmd, loop_rate, True)
+    time.sleep(0.5)
+    if digital_in_0 == 0:
+        print("No block found")
+        sys.exit()
     move_arm(pub_cmd, loop_rate, Q[start_loc][start_height][1], 4.0, 4.0)
     
-    move_arm(pub_cmd, loop_rate, Q[end_loc][start_height][1], 4.0, 4.0)
-    move_arm(pub_cmd, loop_rate, Q[end_loc][start_height][0], 4.0, 4.0)
+    move_arm(pub_cmd, loop_rate, Q[end_loc][end_height][1], 4.0, 4.0)
+    move_arm(pub_cmd, loop_rate, Q[end_loc][end_height][0], 4.0, 4.0)
     gripper(pub_cmd, loop_rate, False)
     move_arm(pub_cmd, loop_rate, Q[end_loc][end_height][1], 4.0, 4.0)
     ### Hint: Use the Q array to map out your towers by location and "height".
@@ -191,7 +199,6 @@ def move_block(pub_cmd, loop_rate, start_loc, start_height, \
 
 
 ############### Your Code End Here ###############
-def gripper_callback()
 
 def main():
 
@@ -252,8 +259,8 @@ def main():
             print("YAML not found")
             sys.exit()
 
-    for pos in Q:
-        print(pos)
+    # for pos in Q:
+    #     print(pos)
     # Initialize ROS node
     rospy.init_node('lab2node')
 
@@ -268,7 +275,6 @@ def main():
     # TODO: define a ROS subscriber for ur3/gripper_input message and corresponding callback function
 
     sub_grip = rospy.Subscriber('ur3/gripper_input', gripper_input, gripper_callback)
-
 
 
     ############### Your Code End Here ###############
@@ -299,6 +305,35 @@ def main():
         else:
             print("Please just enter the character 1 2 3 or 0 to quit \n\n")
 
+        input_dest = raw_input("Enter destination tower <Either 1 2 3 or 0 to quit> ")
+        destination_tower = 0
+
+        if(int(input_dest) == 1):
+            destination_tower = 1
+        elif (int(input_dest) == 2):
+            destination_tower = 2
+        elif (int(input_dest) == 3):
+            destination_tower = 3
+        elif (int(input_dest) == 0):
+            print("Quitting... ")
+            sys.exit()
+        else:
+            print("Please just enter the character 1 2 3 or 0 to quit \n\n")
+
+        input_start = raw_input("Enter start tower <Either 1 2 3 or 0 to quit> ")
+        start_tower = 0
+
+        if(int(input_start) == 1):
+            start_tower = 1
+        elif (int(input_start) == 2):
+            start_tower = 2
+        elif (int(input_start) == 3):
+            start_tower = 3
+        elif (int(input_start) == 0):
+            print("Quitting... ")
+            sys.exit()
+        else:
+            print("Please just enter the character 1 2 3 or 0 to quit \n\n")
 
 
 
@@ -317,23 +352,48 @@ def main():
     # TODO: modify the code so that UR3 can move tower accordingly from user input
 
     while(loop_count > 0):
+        
+        if start_tower == destination_tower:
+            break
+        
+        tower_list = [1, 2, 3]
 
-        move_arm(pub_command, loop_rate, home, 4.0, 4.0)
+        if start_tower == 1 and destination_tower == 3 or start_tower == 3 and destination_tower ==  1:
+            aux_tower = 2
+        elif start_tower == 2 and destination_tower == 3 or start_tower == 3 and destination_tower == 2:
+            aux_tower = 1
+        elif start_tower == 1 and destination_tower == 2 or start_tower == 2 and destination_tower == 1:
+            aux_tower = 3
 
-        rospy.loginfo("Sending goal 1 ...")
-        move_arm(pub_command, loop_rate, Q[0][0][1], 4.0, 4.0)
+        
+        move_block(pub_command, loop_rate, start_tower - 1, 2, aux_tower - 1, 0)
+        move_block(pub_command, loop_rate, start_tower - 1, 1, destination_tower - 1, 0)
+        move_block(pub_command, loop_rate, aux_tower - 1, 0, start_tower - 1, 1)
+        move_block(pub_command, loop_rate, destination_tower - 1, 0, aux_tower - 1, 0)
+        move_block(pub_command, loop_rate, start_tower - 1, 1, aux_tower -  1, 1)
 
-        gripper(pub_command, loop_rate, suction_on)
-        # Delay to make sure suction cup has grasped the block
-        time.sleep(1.0)
+        move_block(pub_command, loop_rate, start_tower - 1, 0, destination_tower - 1, 0)
+        move_block(pub_command, loop_rate, aux_tower - 1, 1, start_tower - 1, 0)
+        move_block(pub_command, loop_rate, aux_tower - 1, 0, destination_tower - 1, 1)
+        move_block(pub_command, loop_rate, start_tower - 1, 0, destination_tower - 1, 2)
+        break
+        # move_arm(pub_command, loop_rate, home, 4.0, 4.0)
 
-        rospy.loginfo("Sending goal 2 ...")
-        move_arm(pub_command, loop_rate, Q[1][1][1], 4.0, 4.0)
+        # rospy.loginfo("Sending goal 1 ...")
+        # move_arm(pub_command, loop_rate, Q[0][0][1], 4.0, 4.0)
 
-        rospy.loginfo("Sending goal 3 ...")
-        move_arm(pub_command, loop_rate, Q[2][0][1], 4.0, 4.0)
+        # gripper(pub_command, loop_rate, suction_on)
+        # # Delay to make sure suction cup has grasped the block
+        # time.sleep(1.0)
 
-        loop_count = loop_count - 1
+        # rospy.loginfo("Sending goal 2 ...")
+        # move_arm(pub_command, loop_rate, Q[1][1][1], 4.0, 4.0)
+
+        # rospy.loginfo("Sending goal 3 ...")
+        # move_arm(pub_command, loop_rate, Q[2][0][1], 4.0, 4.0)
+
+        # loop_count = loop_count - 1
+
 
     gripper(pub_command, loop_rate, suction_off)
 

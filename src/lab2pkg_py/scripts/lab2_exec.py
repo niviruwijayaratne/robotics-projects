@@ -366,14 +366,12 @@ def main():
             aux_tower = 3
 
         
-        move_block(pub_command, loop_rate, start_tower - 1, 2, aux_tower - 1, 0)
-        move_block(pub_command, loop_rate, start_tower - 1, 1, destination_tower - 1, 0)
-        move_block(pub_command, loop_rate, aux_tower - 1, 0, start_tower - 1, 1)
-        move_block(pub_command, loop_rate, destination_tower - 1, 0, aux_tower - 1, 0)
-        move_block(pub_command, loop_rate, start_tower - 1, 1, aux_tower -  1, 1)
-
+        move_block(pub_command, loop_rate, start_tower - 1, 2, destination_tower - 1, 0)
+        move_block(pub_command, loop_rate, start_tower - 1, 1, aux_tower - 1, 0)
+        move_block(pub_command, loop_rate, destination_tower - 1, 0, aux_tower - 1, 1)
         move_block(pub_command, loop_rate, start_tower - 1, 0, destination_tower - 1, 0)
-        move_block(pub_command, loop_rate, aux_tower - 1, 1, start_tower - 1, 0)
+        move_block(pub_command, loop_rate, aux_tower - 1, 1, start_tower -  1, 0)
+
         move_block(pub_command, loop_rate, aux_tower - 1, 0, destination_tower - 1, 1)
         move_block(pub_command, loop_rate, start_tower - 1, 0, destination_tower - 1, 2)
         break

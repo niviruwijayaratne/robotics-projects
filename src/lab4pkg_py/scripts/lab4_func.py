@@ -106,28 +106,32 @@ def lab_invk(xWgrip, yWgrip, zWgrip, yaw_WgripDegree):
 	l09 = 0.0535
 	l10 = 0.059   # thickness of aluminum plate is around 0.01
 
-	offset = [.150, -.150, -0.01]
-	xgrip = xWgrip + offset[0]
-	ygrip = yWgrip + offset[1]
-	zgrip = yWgrip + offset[2]
+	grip_offset = [0.15, -0.15, 0.01]
+	xgrip = xWgrip + grip_offset[0]
+	ygrip = yWgrip + grip_offset[1]
+	zgrip = zWgrip + grip_offset[2]
 
+	# yaw_WgripRad = PI*yaw_WgripDegree/180
+	
 	xcen = xgrip - (l09*np.cos(PI*yaw_WgripDegree/180.0))
 	ycen = ygrip - (l09*np.sin(PI*yaw_WgripDegree/180.0))
 	zcen = zgrip
-	# print(xcen, ycen, zcen)
+
 	# theta1
 	center_vec_mag = np.sqrt(np.square(xcen) + np.square(ycen))
-	theta1_whole = np.atan2(ycen, xcen)
+	theta1_whole = np.arctan2(ycen, xcen)
 	theta1_partial = np.arcsin((l02 - l04 + l06)/center_vec_mag)
-	thetas[0] = theta1_whole - theta1_partial        # Default value Need to Change
+	thetas[0] = theta1_whole - theta1_partial 
+	
 
 	# theta6
-	thetas[5] = thetas[0] - (PI*yaw_WgripDegree/180.0) + PI/2     # Default value Need to Change
+	thetas[5] = thetas[0] - (PI*yaw_WgripDegree/180.0) + PI/2
  
 	end_offset = 0.027
 	x3end = xcen - l07*np.cos(thetas[0]) + (l06 + end_offset)*np.sin(thetas[0])
 	y3end = ycen - l07*np.sin(thetas[0]) - (l06 + end_offset)*np.cos(thetas[0])
 	z3end = zcen + l08 + l10
+
 
 	base_vec = z3end - l01
 	base_vec_mag = np.sqrt(x3end**2 + y3end**2 + base_vec**2)
@@ -138,7 +142,7 @@ def lab_invk(xWgrip, yWgrip, zWgrip, yaw_WgripDegree):
 	thetas[1]= -(alpha + beta)     # Default value Need to Change
 	thetas[2]= PI - phi      # Default value Need to Change
 	thetas[3]= alpha + beta + phi - PI # Default value Need to Change
-	thetas[4]=-PI/2      # Default value Need to Change
+	thetas[4]=-PI/2
 
 	print("theta1 to theta6: " + str(thetas) + "\n")
 

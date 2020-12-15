@@ -3,6 +3,7 @@
 import cv2
 import numpy as np
 from geometry_msgs.msg import Point
+import sys
 
 def blob_search(image_raw, color):
 
@@ -12,8 +13,29 @@ def blob_search(image_raw, color):
     # Edit Below
     ##################################
     # Replace these with your values for each color
-    lower = (110, 50, 50)   # Blue lower
-    upper = (130, 255, 255) # Blue upper
+    lower = (137, 255, 255)
+    upper = (138, 255, 255)
+
+    blue_lower = (110, 50, 50)
+    blue_upper = (130, 255, 255)
+
+    green_lower = (45, 50, 50)
+    green_upper = (70, 255, 255)
+
+    yellow_lower = (25, 50, 50)
+    yellow_upper = (35, 255, 255)
+
+    if color == "blue":
+        lower = blue_lower
+        upper = blue_upper
+
+    elif color == "green":
+        lower = green_lower
+        upper = green_upper
+
+    elif color == "yellow":
+        lower = yellow_lower
+        upper = yellow_upper
     
     # Edit Above
     ##################################
@@ -58,6 +80,7 @@ def blob_search(image_raw, color):
         print("No blobs found... ")
         r = None
         c = None
+        sys.exit()
     elif i == 1:
         print("One blob found... Yay!")
         keypoint = keypoints[0]
@@ -86,7 +109,7 @@ def blob_search(image_raw, color):
     ##################################
     # Edit below to mark keypoints and draw a circle around the block.
         # Draw a circle around the detected block
-        im_with_keypoints = cv2.circle(image_raw, int(c), int(r), draw_color, 5)
+        im_with_keypoints = cv2.circle(image_raw, (int(c), int(r)), 5, draw_color, 5)
     
         # Draw the keypoints on the detected block
         im_with_keypoints = cv2.drawKeypoints(im_with_keypoints, keypoints, image_raw, (255, 0, 0))

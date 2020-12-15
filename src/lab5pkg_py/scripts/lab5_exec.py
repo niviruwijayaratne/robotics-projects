@@ -13,6 +13,7 @@ from lab5_spawn_block import *
 from lab5_blob_search import *
 from lab5_header import *
 from lab5_func import *
+import time
 
 # Position for UR3 not blocking the camera
 go_away = [270*PI/180.0, -90*PI/180.0, 90*PI/180.0, -90*PI/180.0, -90*PI/180.0, 130*PI/180.0]
@@ -40,8 +41,8 @@ current_position_set = False
 num_configs = 5
 
 # Place holder for block world positions
-green_world_position = None
-yellow_world_position = None
+green_world_position = Point()
+yellow_world_position = Point()
 
 # Final goal positions
 # PLEASE USE THE FOLLOWING GOAL
@@ -62,12 +63,20 @@ TODO: define ROS topic callback funtions for getting the position of blocks
 Whenever block_[color]/world publishes info these callback functions are called.
 """
 def block_green_callback(msg):
-	global green_world_position
-	green_world_position = msg.position
+    global green_world_position
+    # print("green callback", green_world_position)
+    green_world_position.x = msg.x
+    green_world_position.y = msg.y
+    green_world_position.z = msg.z
+    # print("green callback", green_world_position)
 
 def block_yellow_callback(msg):
-	global yellow_world_position
-	yellow_world_position = msg.position
+    global yellow_world_position
+    # print("yellow callback", yellow_world_position)
+    yellow_world_position.x = msg.x
+    yellow_world_position.y = msg.y
+    yellow_world_position.z = msg.z
+    # print("yellow callback", yellow_world_position)
 
 
 ############### Your Code End Here ###############
@@ -219,11 +228,14 @@ def move_block(pub_cmd, loop_rate, start_xw_yw_zw, target_xw_yw_zw, vel, accel):
     global green_world_goal
     global yellow_world_goal
 
-    final_start = lab_invk(start_xw_yw_zw[0], start_xw_yw_zw[1], start_xw_yw_zw[2], 0.0)
-    middle_start = lab_invk(start_xw_yw_zw[0], start_xw_yw_zw[1], start_xw_yw_zw[2] + 0.1, 0.0)
+    print(start_xw_yw_zw)
+    print(target_xw_yw_zw)
 
-    final_end = lab_invk(target_xw_yw_zw[0], target_xw_yw_zw[1], target_xw_yw_zw[2], 0.0)
-    middle_end = lab_invk(target_xw_yw_zw[0], target_xw_yw_zw[1], target_xw_yw_zw[2] + 0.1, 0.0)
+    final_start = lab_invk(start_xw_yw_zw.x, start_xw_yw_zw.y, start_xw_yw_zw.z, 0.0)
+    middle_start = lab_invk(start_xw_yw_zw.x, start_xw_yw_zw.y, start_xw_yw_zw.z + 0.1, 0.0)
+
+    final_end = lab_invk(target_xw_yw_zw.x, target_xw_yw_zw.y, target_xw_yw_zw.z, 0.0)
+    middle_end = lab_invk(target_xw_yw_zw.x, target_xw_yw_zw.y, target_xw_yw_zw.z + 0.1, 0.0)
 
     move_arm(pub_cmd, loop_rate, middle_start, vel, accel)
     move_arm(pub_cmd, loop_rate, final_start, vel, accel)
@@ -290,7 +302,7 @@ if __name__ == '__main__':
     pub_block_yellow_pixel = rospy.Publisher('block_yellow/pixel', Point, queue_size=10)
 
     # Define world position subscriber
-    sub_block_green_world = rospy.Subscriber('block_green/world', Point, block_green_callback())
+    sub_block_green_world = rospy.Subscriber('block_green/world', Point, block_green_callback)
     sub_block_yellow_world = rospy.Subscriber('block_yellow/world', Point, block_yellow_callback)
 
     ############## Your Code End Here ###############
@@ -322,15 +334,24 @@ if __name__ == '__main__':
     # Hint: Remember to delay for your subscriber to update
     # Otherwise you might get None or old images (when running lab 5 multiple times)
     # a short rospy.sleep(time in seconds) after you publish should be sufficient
-    pub_block_green_pixel.publish(green_image_rc)
-    pub_block_yellow_pixel.publish(yellow_image_rc)
+    green_pix = Point()
+    green_pix.x = green_image_rc[0]
+    green_pix.y = green_image_rc[1]
+    green_pix.z = 0.015
+
+    yellow_pix = Point()
+    yellow_pix.x = yellow_image_rc[0]
+    yellow_pix.y = yellow_image_rc[1]
+    yellow_pix.z = 0.015
+ 
+    pub_block_green_pixel.publish(green_pix)
+    pub_block_yellow_pixel.publish(yellow_pix)
     rospy.sleep(1)
 
-    green_start = (green_world_position[0], green_world_position[1], green_world_position[2])
-    yellow_start = (yellow_world_position[0], yellow_world_position[1], yellow_world_position[2])
-
-    move_block(pub_command, loop_rate, green_start, green_world_goal, vel, accel)
-    move_block(pub_command, loop_rate, yellow_start, yellow_world_goal, vel, accel)
+    # print("Green", green_world_position)
+    # print("Yellow", yellow_world_position)
+    move_block(pub_command, loop_rate, green_world_position, green_world_goal, vel, accel)
+    move_block(pub_command, loop_rate, yellow_world_position, yellow_world_goal, vel, accel)
     ############## Your Code End Here ###############
 
     # Move arm to away position

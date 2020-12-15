@@ -30,14 +30,16 @@ def IMG2W(r,c):
 
     ################################ Your Code Start Here ################################
     # Given theta, beta, tx, ty, calculate the world coordinate of r,c namely xw, yw
-    O_r, O_c = w/2, h/2
+    O_r, O_c = 240, 320
+    # theta = -theta
+    xc, yc = (r - O_r)/beta, (c - O_c)/beta
+    # theta = np.radians(theta)
+    rotz = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+    new_cs = np.matmul(np.linalg.inv(rotz), np.array([[xc - tx], [yc - ty]]))
 
-    xc, yc = beta*O_r, beta*O_c
-    rotz = np.array([[np.cos(theta), -np.sin(theta), 0], [np.sin(theta), np.cos(theta), 0], [0, 0, 1]])
-    new_cs = np.dot(rotz, np.array([[xc], [yc], [block_height]]))
+    xw, yw = new_cs[0], new_cs[1]
 
-    xw, yw = new_cs[0] + tx, new_cs[1] + ty
-
+    # print(xw, yw)
     ################################# Your Code End Here #################################
     return xw, yw
 
